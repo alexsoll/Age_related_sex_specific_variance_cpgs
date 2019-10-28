@@ -1,6 +1,6 @@
-from scipy.stats import linregress
+import numpy as np
 import math
-#import scipy
+from sklearn.linear_model import LinearRegression
 
 def stdev(data):
     diffs = 0
@@ -17,15 +17,35 @@ def math_expectation(data):
 
 def get_coeff_determination(x, y, method):
     if method == 'lin-lin':
-        (coefficients, intercept, rvalue, pvalue, stderr) = linregress(x, y)
+        x = np.array(x).reshape(-1, 1)
+        y = np.array(y)
+
+        model = LinearRegression()
+        model.fit(x, y)
+        r_sq = model.score(x, y)
     elif method == 'lin-log':
-        y = math.log2(y)
-        (coefficients, intercept, rvalue, pvalue, stderr) = linregress(x, y)
+        y_ = [math.log2(i) for i in y]
+        x = np.array(x).reshape(-1, 1)
+        y_ = np.array(y_)
+
+        model = LinearRegression()
+        model.fit(x, y_)
+        r_sq = model.score(x, y)
     elif method == 'log-lin':
-        x = math.log2(x)
-        (coefficients, intercept, rvalue, pvalue, stderr) = linregress(x, y)
+        x_ = [math.log2(i) for i in x]
+        x_ = np.array(x_).reshape(-1, 1)
+        y = np.array(y)
+
+        model = LinearRegression()
+        model.fit(x_, y)
+        r_sq = model.score(x_, y)
     elif method == 'log-log':
-        x = math.log2(x)
-        y = math.log2(y)
-        (coefficients, intercept, rvalue, pvalue, stderr) = linregress(x, y)
-    return coefficients, intercept, rvalue, pvalue, stderr
+        x_ = [math.log2(i) for i in x]
+        y_ = [math.log2(i) for i in y]
+        x_ = np.array(x_).reshape(-1, 1)
+        y_ = np.array(y_)
+
+        model = LinearRegression()
+        model.fit(x_, y_)
+        r_sq = model.score(x_, y_)
+    return  r_sq

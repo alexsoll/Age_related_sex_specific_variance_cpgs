@@ -15,43 +15,151 @@ def argparser():
 
 
 def test():
-    ages = data.get_ages('C:\\Users\\alsol\\Desktop\\scientific_adviser\\attributes_GSE87571.txt')
-    with open('C:\\Users\\alsol\\Desktop\\scientific_adviser\\average_beta.txt') as file:
+    ages_M_indexes, ages_F_indexes = data.get_M_F_ages_indexes('C:\\Users\\asoluyan\\Documents\\GitHub\\attributes.txt')
+    ages = data.get_ages('C:\\Users\\asoluyan\\Documents\\GitHub\\attributes.txt')
+    with open('C:\\Users\\asoluyan\\Documents\\GitHub\\beta.txt') as file:
         file.readline()
-        '''while True:
-            line = file.readline().split()
-            if len(line) == 0:
-                break
-            name = line.pop(0)
-            betas = np.asarray([float(beta) for beta in line], dtype=float)
-            sigma = stats.stdev(betas)
-            avg = stats.math_expectation(betas)
-            print(avg + 2 * sigma)
-            print(avg - 2 * sigma)'''
         line = file.readline().split()
         name = line.pop(0)
-        betas = line
-        sigma = stats.stdev(betas)
-        avg = stats.math_expectation(betas)
-        low, high = processing.get_low_high_betas(betas, ages)
-        print(low)
-        print(high)
-        r2_h = stats.get_coeff_determination(ages, high, 'lin-lin')
+        betas = [float(elem) for elem in line]
+        low, high, using_ages = processing.get_low_high_betas(betas, ages)
+        local_min_r2 = 1
+        max_r2 = 0
+        for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+            for y in low, high:
+                res = stats.get_coeff_determination(using_ages, y, method)
+                if local_min_r2 >= res:
+                    local_min_r2 = res
+            if max_r2 <= local_min_r2:
+                max_r2 = local_min_r2
+
+        ########################################################
+        local_min_r2_f = 1
+        max_r2_f = 0
+        ages_F = []
+        ages_M = []
+        betas_M = []
+        betas_F = []
+        for i in range(len(ages_F_indexes)):
+            ages_F.append(ages[ages_F_indexes[i]])
+            betas_F.append(betas[ages_F_indexes[i]])
+        for i in range(len(ages_M_indexes)):
+            ages_M.append(ages[ages_M_indexes[i]])
+            betas_M.append(betas[ages_M_indexes[i]])
+        low, high, using_ages = processing.get_low_high_betas(betas_F, ages_F)
+        for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+            for y in low, high:
+                res_f = stats.get_coeff_determination(using_ages, y, method)
+                if local_min_r2_f >= res_f:
+                    local_min_r2_f = res_f
+            if max_r2_f <= local_min_r2_f:
+                max_r2_f = local_min_r2_f
+        ####################################################
+        local_min_r2_m = 1
+        max_r2_m = 0
+        low, high, using_ages = processing.get_low_high_betas(betas_M, ages_M)
+        for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+            for y in low, high:
+                res_m = stats.get_coeff_determination(using_ages, y, method)
+                if local_min_r2_m >= res_m:
+                    local_min_r2_m = res_m
+            if max_r2_m <= local_min_r2_m:
+                max_r2_m = local_min_r2_m
+        print(max_r2)
+        print(max_r2_f)
+        print(max_r2_m)
+        #######################################################
+        length = processing.get_length_sides(betas, ages)
+        print(length[0], length[1])
 
 
 def main():
-    with open('C:\\Users\\alsol\\Desktop\\scientific_adviser\\average_beta.txt') as file:
+    result_table = {}
+    ages_M_indexes, ages_F_indexes = data.get_M_F_ages_indexes('C:\\Users\\asoluyan\\Documents\\GitHub\\attributes.txt')
+    ages = data.get_ages('C:\\Users\\asoluyan\\Documents\\GitHub\\attributes.txt')
+    with open('C:\\Users\\asoluyan\\Documents\\GitHub\\eta.txt') as file:
         file.readline()
         while True:
             line = file.readline().split()
             if len(line) == 0:
                 break
             name = line.pop(0)
-            betas = line
-            sigma = stats.stdev(betas)
-            avg = stats.math_expectation(betas)
-            low, high = processing.get_low_high_betas(betas, data.get_ages(
-                'C:\\Users\\alsol\\Desktop\\scientific_adviser\\attributes_GSE87571.txt'))
+            result_table[name] = {'z': ''}
+            betas = [float(elem) for elem in line]
+            low, high, using_ages = processing.get_low_high_betas(betas, ages)
+            local_min_r2 = 1
+            max_r2 = 0
+            for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+                for y in low, high:
+                    res = stats.get_coeff_determination(using_ages, y, method)
+                    if local_min_r2 >= res:
+                        local_min_r2 = res
+                if max_r2 <= local_min_r2:
+                    max_r2 = local_min_r2
+            result_table[name]['z'] = max_r2
+            ###########################################################
+            local_min_r2_f = 1
+            max_r2_f = 0
+            ages_F = []
+            ages_M = []
+            betas_M = []
+            betas_F = []
+            for i in range(len(ages_F_indexes)):
+                ages_F.append(ages[ages_F_indexes[i]])
+                betas_F.append(betas[ages_F_indexes[i]])
+            for i in range(len(ages_M_indexes)):
+                ages_M.append(ages[ages_M_indexes[i]])
+                betas_M.append(betas[ages_M_indexes[i]])
+            low, high, using_ages = processing.get_low_high_betas(betas_F, ages_F)
+            for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+                for y in low, high:
+                    res_f = stats.get_coeff_determination(using_ages, y, method)
+                    if local_min_r2_f >= res_f:
+                        local_min_r2_f = res_f
+                if max_r2_f <= local_min_r2_f:
+                    max_r2_f = local_min_r2_f
+            ####################################################
+            local_min_r2_m = 1
+            max_r2_m = 0
+            low, high, using_ages = processing.get_low_high_betas(betas_M, ages_M)
+            for method in 'lin-lin', 'lin-log', 'log-lin', 'log-log':
+                for y in low, high:
+                    res_m = stats.get_coeff_determination(using_ages, y, method)
+                    if local_min_r2_m >= res_m:
+                        local_min_r2_m = res_m
+                if max_r2_m <= local_min_r2_m:
+                    max_r2_m = local_min_r2_m
+            #####################################################
+            result_table[name]['r2_M'] = max_r2_m
+            result_table[name]['r2_F'] = max_r2_f
+            ######################################################
+            length_M = processing.get_length_sides(betas_M, ages_M)
+            length_F = processing.get_length_sides(betas_F, ages_F)
+
+            result_table[name]['I_1_F'] = length_F[0]
+            result_table[name]['I_2_F'] = length_F[1]
+            result_table[name]['I_1_M'] = length_M[0]
+            result_table[name]['I_2_M'] = length_M[1]
+
+            if length_F[0] / length_F[1] > length_F[1] / length_F[0]:
+                result_table[name]['I_F'] = max(length_F[0] / length_F[1], length_F[1] / length_F[0])
+                result_table[name]['I_F_type'] = 0
+            else:
+                result_table[name]['I_M'] = max(length_M[0] / length_M[1], length_M[1] / length_M[0])
+                result_table[name]['I_F_type'] = 1
+
+            #######################################################
+
+            result_table[name]['Y_sex_indep'] = max(result_table[name]['I_M'] / result_table[name]['I_F'],
+                                          result_table[name]['I_F'] / result_table[name]['I_M'])
+
+            #######################################################
+
+            result_table[name]['Y_sex_dep'] = max(max(length_F[0] / length_M[0], length_M[0] / length_F[0]),
+                                                              max(length_F[1] / length_M[1], length_M[1] / length_F[1]))
+
+
+
 
 
 
