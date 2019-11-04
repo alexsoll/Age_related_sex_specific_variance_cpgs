@@ -24,6 +24,10 @@ def get_coeff_determination(x, y, method):
         model.fit(x, y)
         r_sq = model.score(x, y)
     elif method == 'lin-log':
+        #print(x)
+        #print(len(x))
+        #print(y)
+        #print(len(y))
         y_ = [math.log2(i) for i in y]
         x = np.array(x).reshape(-1, 1)
         y_ = np.array(y_)

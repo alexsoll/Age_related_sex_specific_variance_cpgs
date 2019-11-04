@@ -1,6 +1,3 @@
-#import numpy as np
-
-
 def get_ages(file):
     with open(file, 'r') as ages_file:
         ages_file.readline()
